@@ -13,7 +13,8 @@ const PostSchema = mongoose.Schema({
     user:{
         type:String
     }
-})
+},
+{timestamps:true})
 
 const PostModel = mongoose.model("post",PostSchema);
 

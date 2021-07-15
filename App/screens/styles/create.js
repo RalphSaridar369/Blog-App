@@ -6,9 +6,6 @@ const wt = Dimensions.get('window').width;
 
 export default StyleSheet.create({
     createContainer:{
-        position:'absolute',
-        marginHorizontal:wt/10,
-        bottom:10,
         display:'flex',
         justifyContent:'center',
         alignItems:'center'
@@ -35,15 +32,18 @@ export default StyleSheet.create({
     inputs:{
         flex:1,
         fontSize:20,
+        borderWidth:0.4,
+        borderColor:'black',
+        borderRadius:10,
     },
     iconandinput:{
         flexDirection:'row',
         borderRadius:10,
-        marginTop:10,
+        marginTop:5,
         borderColor:'#d3d3d3',
         borderWidth:1,
         backgroundColor:'#fff',
-        padding:0
+        marginHorizontal: wt-wt*0.95,
     },
     icon:{
         paddingTop:15,
@@ -87,10 +87,8 @@ export default StyleSheet.create({
         color:'#228B22',
     },
     image:{
-        width:wt-wt*0.4,
-        height:200,
-        marginVertical:40,
-        marginHorizontal:20
+        width:wt,
+        height:ht-0.5*ht,
 
     }
 })

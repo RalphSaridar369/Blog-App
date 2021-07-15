@@ -1,10 +1,11 @@
-import React, {useState, useContext, useRef} from 'react';
+import React, {useState, useContext, useRef, useEffect} from 'react';
 import Button from './Button';
 import { AuthContext } from '../components/context';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { View, Image, TextInput, Text, ScrollView, TouchableWithoutFeedback, Alert} from 'react-native';
+import { View, Image, TextInput, Text, Keyboard, TouchableWithoutFeedback,
+     Alert, Dimensions, Modal, Animated, TouchableOpacity, StyleSheet} from 'react-native';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import styles from './styles/auth';
+import styles from './styles/create';
 import {Formik} from 'formik';
 import * as yup from 'yup';
 
@@ -29,8 +30,47 @@ const createSchema = yup.object({
         .max(50, 'Description must be shorter than 50 characters'),
 })
 
+
+
+const ModalPoup = ({visible, children}) => {
+    const [showModal, setShowModal] =useState(visible);
+    const scaleValue =useRef(new Animated.Value(0)).current;
+   useEffect(() => {
+      toggleModal();
+    }, [visible]);
+    const toggleModal = () => {
+      if (visible) {
+        setShowModal(true);
+        Animated.spring(scaleValue, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      } else {
+        setTimeout(() => setShowModal(false), 200);
+        Animated.timing(scaleValue, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      }
+    };
+    return (
+      <Modal transparent visible={showModal}>
+        <View style={stylesModal.modalBackGround}>
+          <Animated.View
+            style={[stylesModal.modalContainer, {transform: [{scale: scaleValue}]}]}>
+            {children}
+          </Animated.View>
+        </View>
+      </Modal>
+    );
+  };
+
+
 const Create = () => {
 
+    const [visible, setVisible] = useState(false);
     const {create, userToken} = useContext(AuthContext);
     const refImg = useRef();
     const [imageUri,setImageUri]=useState("");
@@ -89,60 +129,119 @@ const Create = () => {
     }
 
     return (
-        <ScrollView>
-        <Formik
-        style={{marginTop:20,}}
-            validationSchema={createSchema}
-            initialValues={{ title:'', description:''}}
-            onSubmit={(values,actions)=>{
-                    create({...values,...imageUri});
-                    Alert.alert("Post Creation","Post was created");
-                    actions.resetForm();
-                    setImageUri("");
-                    }}>
-                {(formikProps)=>(
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <Formik
+                style={{}}
+                validationSchema={createSchema}
+                initialValues={{ title:'', description:''}}
+                onSubmit={(values,actions)=>{
+                        create({...values,...imageUri});
+                        Alert.alert("Post Creation","Post was created");
+                        actions.resetForm();
+                        setImageUri("");
+                        }}>
+                    {(formikProps)=>(
+            
+                    <View style={styles.createContainer}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 
-                <View style={styles.container}>
-                    
-                    <View style={styles.inputsContainer}>
-                        <TouchableWithoutFeedback
-                            onPress={()=>openGallery()}>
-                            {imageUri
-                            ?<Image source={imageUri} style={styles.image} ref={refImg} /> 
-                            :<Image source={require('../assets/default.jpg')} style={styles.image} />}
-                        </TouchableWithoutFeedback>
-                        <Text style={{fontSize:15,textAlign:'center',fontFamily:'Roboto-Regular', color:'black'}}>or simply take a picture</Text>
-                        <Icon name="camera" size={40} color="#228B22"
-                         style={{textAlign:'center',marginVertical:20}}
-                         onPress={()=>openCam()}/>
-                        <View style={styles.iconandinput}>
-                            <TextInput placeholder="Title" style={styles.inputs}
-                             value={formikProps.values.title}
-                             onChangeText={formikProps.handleChange('title')}
-                             onBlur={formikProps.handleBlur('title')}
-                              />
-                        
+                            <View style={styles.inputsContainer}>
+                                    <TouchableWithoutFeedback
+                                        onPress={() => setVisible(true)}>
+                                        {imageUri
+                                        ?<Image source={imageUri} style={styles.image} ref={refImg} />
+                                        :<Image source={require('../assets/default.jpg')} style={styles.image} />}
+                                    </TouchableWithoutFeedback>
+                
+                                    <ModalPoup visible={visible}>
+                                        <View style={{alignItems: 'flex-end'}}>
+                                            <View style={styles.header}>
+                                                <TouchableOpacity onPress={() => setVisible(false)}
+                                                 style={{position:'relative', top:0, marginBottom:40,}}>
+                                                    <Icon name="close" size={30} color="red"/>
+                                                </TouchableOpacity>
+                                            </View>
+                                        </View>
+                                        <View style={{display:'flex',flexDirection:'row',justifyContent:'center',alignItems:'center', marginBottom:50}}>
+                                            <TouchableOpacity onPress={()=>{
+                                                setVisible(false);
+                                                openCam();
+                
+                                            }}>
+                                                <Icon name="camera" color="#228B22" size={40} style={{marginHorizontal:50}}/>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity onPress={()=>{
+                                                setVisible(false);
+                                                openGallery();
+                
+                                                }}>
+                                                <Icon name="photo" color="#228B22" size={40} style={{marginHorizontal:50}}/>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </ModalPoup>
+                               {/* <Text style={{fontSize:15,textAlign:'center',fontFamily:'Roboto-Regular', color:'black'}}>or simply take a picture</Text>
+                                <Icon name="camera" size={40} color="#228B22"
+                                 style={{textAlign:'center',marginVertical:20}}
+                                    onPress={()=>openCam()}/> */}
+                                <View style={{display:"flex",justifyContent:'center',alignItems:'center',marginTop:5}}>
+                                    <Text style={{fontSize:30,color:'#228B22',fontFamily:'Roboto-Regular'}}>Create&nbsp;
+                                    <Text style={{fontSize:30,color:"black",fontFamily:'Roboto-Regular'}}>Blog</Text></Text>
+                                </View>
+                                <View style={{display:"flex",justifyContent:'center',alignItems:'center'}}>
+                                    <Text style={styles.error}>{(formikProps.touched.title &&formikProps.errors.title )||(formikProps.touched.description && formikProps.errors.description)}</Text>
+                                </View>
+                                <View style={styles.iconandinput}>
+                                    <TextInput placeholder="Title" style={styles.inputs}
+                                     value={formikProps.values.title}
+                                     onChangeText={formikProps.handleChange('title')}
+                                     onBlur={formikProps.handleBlur('title')}
+                                      />
+                
+                                </View>
+                                <View style={styles.iconandinput}>
+                                    <TextInput placeholder="Description" style={styles.inputs}
+                                     multiline = {true} numberOfLines = {4}
+                                     value={formikProps.values.description}
+                                     onChangeText={formikProps.handleChange('description')}
+                                     onBlur={formikProps.handleBlur('description')}
+                                     />
+                                </View>
+                
+                                <View style={{marginHorizontal:Dimensions.get('window').width*0.05}}>
+                                    <Button title="Submit"
+                                    color="#228B22" style={styles.button}
+                                    onPress={formikProps.handleSubmit}/>
+                                </View>
                         </View>
-                        <Text style={styles.error}>{formikProps.touched.title && formikProps.errors.title}</Text>
-                        <View style={styles.iconandinput}>
-                            <TextInput placeholder="Description" style={styles.inputs}
-                             multiline = {true} numberOfLines = {4}
-                             value={formikProps.values.description}
-                             onChangeText={formikProps.handleChange('description')}
-                             onBlur={formikProps.handleBlur('description')}
-                             />
-                        </View>
-                        
-                        <Text style={styles.error}>{formikProps.touched.description && formikProps.errors.description}</Text>
-                        <Button title="Submit"
-                        color="#228B22" style={styles.button}
-                        onPress={formikProps.handleSubmit}/>
-                    </View>
-                </View>)}
-
-            </Formik> 
-        </ScrollView>
+            </TouchableWithoutFeedback>
+                    </View>)}
+                </Formik>
+        </TouchableWithoutFeedback>
     )
 }
+
+const stylesModal = StyleSheet.create({
+    modalBackGround: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContainer: {
+      width: '80%',
+      backgroundColor: 'white',
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 20,
+      elevation: 20,
+    },
+    header: {
+      width: '100%',
+      height: 40,
+      alignItems: 'flex-end',
+      justifyContent: 'center',
+    },
+  });
+  
 
 export default Create

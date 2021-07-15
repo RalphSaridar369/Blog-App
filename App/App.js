@@ -5,8 +5,8 @@
  * @format
  * @flow strict-local
  */
-import React, {useMemo, useEffect, useState, useReducer} from 'react';
-import {Alert, View, Image, Text} from 'react-native';
+import React, {useMemo, useEffect, useState, useRef, useReducer} from 'react';
+import {Alert, View, Image, Text, Animated} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator,} from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -24,7 +24,31 @@ const Tab = createBottomTabNavigator();
 
 const App=({navigation}) => {
 
-  
+  const treeAnimation = useRef(new Animated.Value(0)).current;
+  const animateTree =()=>{
+
+    Animated.timing(treeAnimation,{
+      toValue:5,
+      duration: 1000,
+      useNativeDriver:true,
+    }).start((e)=>{
+      setTimeout(()=>{
+        setIsLoading(false);
+      },1000)
+      
+    });
+
+  }
+
+  const logoAnimation = useRef(new Animated.Value(0)).current;
+  const animateLogo =()=>{
+
+    Animated.timing(logoAnimation,{
+      toValue:1,
+      useNativeDriver:true,
+    }).start();
+
+  }
 
 
   const [isLoading, setIsLoading] = useState(true);
@@ -46,11 +70,9 @@ loginReducer = (state,action)=>{
 
 
   useEffect(() => {
-      setTimeout(async()=>{
-        setIsLoading(false);
-
-      }, 1000)
-  }, []) 
+        animateTree();
+        animateLogo();
+    }, []) 
 
   const [posts, dispatch] = useReducer(loginReducer, initialPostsState);
 
@@ -134,9 +156,13 @@ loginReducer = (state,action)=>{
   if(isLoading){
     return(
       <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
-         <Image source={require("./assets/logo.png")} style={{width:150,height:150}}/>
-         <Text style={{fontSize:30,color:'#228b22',fontFamily:'Roboto-Bold'}}>Nature
-         <Text style={{fontSize:30,color:"black",fontFamily:'Roboto-Bold'}}>Blog</Text></Text>
+         <Animated.Image source={require("./assets/logo.png")} style={{
+           width:30,
+           height:30,
+           transform:[{scale: treeAnimation}]
+           }}/>
+         <Animated.Text style={{marginTop:60,fontSize:30,color:'#228b22',fontFamily:'Roboto-Bold',opacity:logoAnimation}}>Nature
+         <Text style={{fontSize:30,color:"black",fontFamily:'Roboto-Bold'}}>Blog</Text></Animated.Text>
       </View>
   )}
   

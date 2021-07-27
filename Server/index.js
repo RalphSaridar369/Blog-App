@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();
 
 const User = require('./models/Users');
 const Post = require('./models/Posts');
@@ -11,7 +12,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const url ='mongodb+srv://Ralph:Spider@facebook.wzrk7.mongodb.net/blog?retryWrites=true&w=majority';
+const url =process.env.REACT_APP_DB_REG;
 
 mongoose.connect(url,{useNewUrlParser:true,useUnifiedTopology:true},()=>{console.log("connected to the database")});
 

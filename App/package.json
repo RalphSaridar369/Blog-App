@@ -18,7 +18,7 @@
     "axios": "^0.21.1",
     "formik": "^2.2.9",
     "react": "17.0.1",
-    "react-native": "0.64.2",
+    "react-native": "^0.64.2",
     "react-native-base64": "^0.2.1",
     "react-native-camera": "^3.44.3",
     "react-native-camera-hooks": "^0.5.1",
